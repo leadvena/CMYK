@@ -1,11 +1,11 @@
-const fs = require('fs');
-const path = require('path');
-
-const vitePath = path.join(__dirname, 'node_modules', '.bin', 'vite');
+// fix-permissions.js
+const { execSync } = require("child_process");
 
 try {
-  fs.chmodSync(vitePath, '755');
-  console.log('Vite binary is now executable');
+  console.log("Fixing node_modules/.bin permissions for Linux...");
+  execSync("chmod -R 755 node_modules/.bin", { stdio: "inherit" });
+  console.log("Permissions fixed!");
 } catch (err) {
-  console.error('Failed to fix permissions', err);
+  console.error("Failed to fix permissions:", err);
+  process.exit(1);
 }
