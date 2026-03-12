@@ -1,7 +1,8 @@
+"use client";
+
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/client";
 import { spring } from "@/lib/motion";
 
 const QuoteForm = () => {
@@ -15,25 +16,19 @@ const QuoteForm = () => {
     setIsSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
-    const payload = {
-      name: formData.get("name") as string,
-      phone: formData.get("phone") as string,
-      email: formData.get("email") as string,
-      service: formData.get("service") as string,
-      size: formData.get("size") as string,
-      quantity: formData.get("quantity") as string,
-      message: formData.get("message") as string,
-    };
 
     try {
-      const { data, error } = await supabase.functions.invoke("send-quote", {
-        body: payload,
+      const res = await fetch("/api/send-quote", {
+        method: "POST",
+        body: formData, // send FormData directly, including file
       });
 
-      if (error) throw error;
+      if (!res.ok) throw new Error("Failed to send quote request");
 
       setSubmitted(true);
       toast.success("Quote request sent successfully!");
+      e.currentTarget.reset();
+      setFileName("");
     } catch (err) {
       console.error("Submit error:", err);
       toast.error("Something went wrong. Please try again.");
@@ -129,6 +124,7 @@ const QuoteForm = () => {
                 type="file"
                 className="hidden"
                 accept="image/*,.pdf,.ai,.psd"
+                name="file"
                 onChange={(e) => setFileName(e.target.files?.[0]?.name || "")}
               />
               <p className="text-muted-foreground text-sm">
