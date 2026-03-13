@@ -13,21 +13,24 @@ const QuoteForm = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const form = e.currentTarget; // FIX: store form before await
     setIsSubmitting(true);
 
-    const formData = new FormData(e.currentTarget);
+    const formData = new FormData(form);
 
     try {
       const res = await fetch("/api/send-quote", {
         method: "POST",
-        body: formData, // send FormData directly, including file
+        body: formData,
       });
 
       if (!res.ok) throw new Error("Failed to send quote request");
 
       setSubmitted(true);
       toast.success("Quote request sent successfully!");
-      e.currentTarget.reset();
+
+      form.reset(); // FIX: reset stored form
       setFileName("");
     } catch (err) {
       console.error("Submit error:", err);
@@ -100,7 +103,14 @@ const QuoteForm = () => {
               <input name="name" required placeholder="Full Name" className={inputClass} />
               <input name="phone" required placeholder="Phone Number" className={inputClass} />
             </div>
-            <input name="email" type="email" required placeholder="Email Address" className={inputClass} />
+
+            <input
+              name="email"
+              type="email"
+              required
+              placeholder="Email Address"
+              className={inputClass}
+            />
 
             <select name="service" required className={inputClass} defaultValue="">
               <option value="" disabled>Select a Service</option>
@@ -112,7 +122,13 @@ const QuoteForm = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <input name="size" placeholder="Size (optional)" className={inputClass} />
-              <input name="quantity" type="number" min="1" placeholder="Quantity" className={inputClass} />
+              <input
+                name="quantity"
+                type="number"
+                min="1"
+                placeholder="Quantity"
+                className={inputClass}
+              />
             </div>
 
             <div
@@ -127,6 +143,7 @@ const QuoteForm = () => {
                 name="file"
                 onChange={(e) => setFileName(e.target.files?.[0]?.name || "")}
               />
+
               <p className="text-muted-foreground text-sm">
                 {fileName || "Click to upload your design file (optional)"}
               </p>
@@ -150,6 +167,7 @@ const QuoteForm = () => {
               <span className="relative z-10 group-hover:text-foreground transition-colors">
                 {isSubmitting ? "Sending..." : "Get My Quote"}
               </span>
+
               <div className="absolute inset-0 bg-gradient-to-r from-cyan via-magenta to-yellow opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </motion.button>
           </form>
