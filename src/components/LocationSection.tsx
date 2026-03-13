@@ -29,8 +29,8 @@ const LocationSection = () => {
           className="rounded-3xl overflow-hidden shadow-base"
         >
           <iframe
-            title="CMYK Prints Location"
-            src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d3919.0!2d124.00506603153785!3d11.05201895488637!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sph!4v1710000000000"
+            title="CMYK Prints and Designs Services Location"
+            src="https://www.google.com/maps?q=11.0520285,124.0051351&z=17&output=embed"
             width="100%"
             height="450"
             style={{ border: 0 }}
