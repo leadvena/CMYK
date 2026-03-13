@@ -22,7 +22,22 @@ export default async function handler(req: Request) {
     const quantity = formData.get("quantity");
     const message = formData.get("message");
 
+    const file = formData.get("file") as File | null;
+
     const resend = new Resend(process.env.RESEND_API_KEY);
+
+    let attachments = [];
+
+    if (file && file.size > 0) {
+
+      const buffer = Buffer.from(await file.arrayBuffer());
+
+      attachments.push({
+        filename: file.name,
+        content: buffer,
+      });
+
+    }
 
     await resend.emails.send({
       from: "CMYK Quotes <onboarding@resend.dev>",
@@ -30,6 +45,7 @@ export default async function handler(req: Request) {
       subject: "New Quote Request",
       html: `
         <h2>New Quote Request</h2>
+
         <p><b>Name:</b> ${name}</p>
         <p><b>Phone:</b> ${phone}</p>
         <p><b>Email:</b> ${email}</p>
@@ -37,20 +53,20 @@ export default async function handler(req: Request) {
         <p><b>Size:</b> ${size}</p>
         <p><b>Quantity:</b> ${quantity}</p>
         <p><b>Message:</b> ${message}</p>
-      `
+      `,
+      attachments
     });
 
     return Response.json({ success: true });
 
-  } catch (err) {
+  } catch (error) {
 
-    console.error(err);
+    console.error(error);
 
     return Response.json(
-      { error: "Email failed" },
+      { error: "Failed to send email" },
       { status: 500 }
     );
 
   }
-
 }
