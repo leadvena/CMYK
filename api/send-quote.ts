@@ -1,15 +1,13 @@
 import { Resend } from "resend";
 
 export const config = {
-  api: {
-    bodyParser: false,
-  },
+  runtime: "edge",
 };
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: Request) {
 
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return new Response("Method Not Allowed", { status: 405 });
   }
 
   try {
@@ -28,11 +26,10 @@ export default async function handler(req: any, res: any) {
 
     await resend.emails.send({
       from: "CMYK Quotes <onboarding@resend.dev>",
-      to: ["kristaezekiel28@gmail.com"],
-      subject: "New CMYK Quote Request",
+      to: "kristaezekiel28@gmail.com",
+      subject: "New Quote Request",
       html: `
         <h2>New Quote Request</h2>
-
         <p><b>Name:</b> ${name}</p>
         <p><b>Phone:</b> ${phone}</p>
         <p><b>Email:</b> ${email}</p>
@@ -43,10 +40,17 @@ export default async function handler(req: any, res: any) {
       `
     });
 
-    return res.status(200).json({ success: true });
+    return Response.json({ success: true });
 
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Email failed" });
+  } catch (err) {
+
+    console.error(err);
+
+    return Response.json(
+      { error: "Email failed" },
+      { status: 500 }
+    );
+
   }
+
 }
