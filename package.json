@@ -4,14 +4,9 @@
     "version": "0.0.0",
     "type": "module",
 "scripts": {
-  "prebuild": "node fix-permissions.js",
   "dev": "vite",
-  "build": "vite build",
-  "build:dev": "vite build --mode development",
-  "lint": "eslint .",
-  "preview": "vite preview",
-  "test": "vitest run",
-  "test:watch": "vitest"
+  "build": "chmod -R 755 node_modules/.bin && vite build",
+  "preview": "vite preview"
 },
     "engines": {
         "node": "24.x"
