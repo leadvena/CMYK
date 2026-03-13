@@ -11,34 +11,35 @@ const QuoteForm = () => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setIsSubmitting(true);
 
-    const form = e.currentTarget; // FIX: store form before await
-    setIsSubmitting(true);
+  // FIX: store form in a separate variable BEFORE awaiting anything
+  const form = e.currentTarget;
+  const formData = new FormData(form);
 
-    const formData = new FormData(form);
+  try {
+    const res = await fetch("/api/send-quote", {
+      method: "POST",
+      body: formData,
+    });
 
-    try {
-      const res = await fetch("/api/send-quote", {
-        method: "POST",
-        body: formData,
-      });
+    if (!res.ok) throw new Error("Failed to send quote request");
 
-      if (!res.ok) throw new Error("Failed to send quote request");
+    setSubmitted(true);
+    toast.success("Quote request sent successfully!");
 
-      setSubmitted(true);
-      toast.success("Quote request sent successfully!");
-
-      form.reset(); // FIX: reset stored form
-      setFileName("");
-    } catch (err) {
-      console.error("Submit error:", err);
-      toast.error("Something went wrong. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    // RESET the stored form, not e.currentTarget
+    form.reset();
+    setFileName("");
+  } catch (err) {
+    console.error("Submit error:", err);
+    toast.error("Something went wrong. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   if (submitted) {
     return (
