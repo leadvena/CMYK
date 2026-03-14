@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, ReactNode } from 'react';
-import { Dialog, DialogContent, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { X } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -23,11 +23,10 @@ const ImageModal = ({ children, image, alt, title }: ImageModalProps) => {
       </div>
 
       {/* Modal Content */}
-      <DialogContent className="max-w-4xl w-full border-0 bg-transparent shadow-none p-0">
+      <DialogContent className="max-w-4xl w-full border-0 bg-black/90 shadow-lg p-4 rounded-lg">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
           transition={{ duration: 0.2 }}
           className="relative"
         >
