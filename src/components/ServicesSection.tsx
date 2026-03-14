@@ -3,6 +3,11 @@ import tarpImg from "@/assets/service-tarpaulin.jpg";
 import shirtImg from "@/assets/service-tshirt.jpg";
 import mugImg from "@/assets/service-mug.jpg";
 import designImg from "@/assets/service-design.jpg";
+import stickersImg from "@/assets/service-stickers.jpg";
+import plaquesImg from "@/assets/service-plaques.jpg";
+import keychainsImg from "@/assets/service-keychains.jpg";
+import magnetsImg from "@/assets/service-magnets.jpg";
+import ImageModal from "./ImageModal";
 
 const services = [
   {
@@ -24,6 +29,26 @@ const services = [
     title: "Graphic Design Services",
     description: "Logos, layouts, tarpaulin designs, and marketing materials crafted by professionals.",
     image: designImg,
+  },
+  {
+    title: "Custom Stickers",
+    description: "Vinyl stickers, decals, and labels. Perfect for branding, promotions, and personalization.",
+    image: stickersImg,
+  },
+  {
+    title: "Plaques & Awards",
+    description: "Engraved wooden and metal plaques for recognition, corporate awards, and special occasions.",
+    image: plaquesImg,
+  },
+  {
+    title: "Custom Keychains",
+    description: "Personalized keychains and promotional items. Great for giveaways and brand recognition.",
+    image: keychainsImg,
+  },
+  {
+    title: "Refrigerator Magnets",
+    description: "Custom printed magnets for refrigerators and magnetic surfaces. Durable and eye-catching.",
+    image: magnetsImg,
   },
 ];
 
@@ -48,7 +73,7 @@ const ServicesSection = () => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {services.map((service, i) => (
             <motion.div
               key={service.title}
@@ -57,17 +82,19 @@ const ServicesSection = () => {
               viewport={{ once: true }}
               transition={{ ...spring, delay: i * 0.1 }}
               whileHover={{ scale: 1.01, y: -2 }}
-              className="bg-card rounded-[32px] p-3 shadow-base hover:shadow-hover transition-shadow group"
+              className="bg-card rounded-[32px] p-3 shadow-base hover:shadow-hover transition-shadow group cursor-pointer"
             >
-              <div className="h-64 w-full rounded-[20px] overflow-hidden relative">
-                <img
-                  src={service.image}
-                  alt={service.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  style={{ transitionTimingFunction: "cubic-bezier(0.16,1,0.3,1)" }}
-                  loading="lazy"
-                />
-              </div>
+              <ImageModal image={service.image} alt={service.title} title={service.title}>
+                <div className="h-64 w-full rounded-[20px] overflow-hidden relative">
+                  <img
+                    src={service.image}
+                    alt={service.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    style={{ transitionTimingFunction: "cubic-bezier(0.16,1,0.3,1)" }}
+                    loading="lazy"
+                  />
+                </div>
+              </ImageModal>
               <div className="p-6">
                 <h3 className="text-2xl font-bold text-foreground">{service.title}</h3>
                 <p className="mt-2 text-muted-foreground leading-relaxed">{service.description}</p>
