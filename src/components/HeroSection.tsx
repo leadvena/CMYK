@@ -8,6 +8,10 @@ const HeroSection = () => {
     document.getElementById("quote")?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const scrollToServices = () => {
+    document.getElementById("services")?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <section className="relative min-h-[90svh] flex items-center justify-center overflow-hidden">
       <img
@@ -55,18 +59,16 @@ const HeroSection = () => {
             Request a Quote
           </motion.button>
 
-          <motion.a
-            href="https://www.facebook.com/p/Cmyk-Bogo-100082468363439/"
-            target="_blank"
-            rel="noopener noreferrer"
+          <motion.button
+            onClick={scrollToServices}
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             transition={spring}
             className="px-8 py-4 rounded-full font-bold text-lg backdrop-blur-md text-center"
             style={{ backgroundColor: "rgba(255,255,255,0.1)", color: "white" }}
           >
-            Chat on Facebook
-          </motion.a>
+            View Our Services
+          </motion.button>
         </motion.div>
 
         <motion.div

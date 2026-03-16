@@ -22,21 +22,34 @@ export default async function handler(req: Request) {
     const quantity = formData.get("quantity");
     const message = formData.get("message");
 
-    const file = formData.get("file") as File | null;
-
     const resend = new Resend(process.env.RESEND_API_KEY);
 
-    let attachments = [];
+    let attachments: any[] = [];
 
-    if (file && file.size > 0) {
+    // Handle multiple files
+    const fileCount = formData.get("fileCount");
+    const count = fileCount ? parseInt(fileCount as string) : 0;
 
-      const buffer = Buffer.from(await file.arrayBuffer());
+    for (let i = 0; i < count; i++) {
+      const file = formData.get(`file_${i}`) as File | null;
+      
+      if (file && file.size > 0) {
+        const arrayBuffer = await file.arrayBuffer();
+        attachments.push({
+          filename: file.name,
+          content: new Uint8Array(arrayBuffer),
+        });
+      }
+    }
 
+    // Also check for legacy single file field for backwards compatibility
+    const legacyFile = formData.get("file") as File | null;
+    if (legacyFile && legacyFile.size > 0) {
+      const arrayBuffer = await legacyFile.arrayBuffer();
       attachments.push({
-        filename: file.name,
-        content: buffer,
+        filename: legacyFile.name,
+        content: new Uint8Array(arrayBuffer),
       });
-
     }
 
     await resend.emails.send({

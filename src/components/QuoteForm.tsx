@@ -4,42 +4,78 @@ import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { spring } from "@/lib/motion";
+import { X } from "lucide-react";
+
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB like Gmail
+const ALLOWED_FILE_TYPES = ["image/*", ".pdf", ".ai", ".psd", ".doc", ".docx", ".txt"];
 
 const QuoteForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-  const [fileName, setFileName] = useState("");
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  setIsSubmitting(true);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    
+    // Validate each file
+    const validFiles: File[] = [];
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(`File "${file.name}" is too large. Max size is 25MB.`);
+        continue;
+      }
+      validFiles.push(file);
+    }
 
-  // FIX: store form in a separate variable BEFORE awaiting anything
-  const form = e.currentTarget;
-  const formData = new FormData(form);
+    if (validFiles.length > 0) {
+      setUploadedFiles((prev) => [...prev, ...validFiles]);
+      toast.success(`${validFiles.length} file(s) added successfully!`);
+    }
 
-  try {
-    const res = await fetch("/api/send-quote", {
-      method: "POST",
-      body: formData,
+    // Reset input so same file can be selected again
+    if (fileRef.current) {
+      fileRef.current.value = "";
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    // Append uploaded files to FormData
+    uploadedFiles.forEach((file, index) => {
+      formData.append(`file_${index}`, file);
     });
+    formData.append("fileCount", uploadedFiles.length.toString());
 
-    if (!res.ok) throw new Error("Failed to send quote request");
+    try {
+      const res = await fetch("/api/send-quote", {
+        method: "POST",
+        body: formData,
+      });
 
-    setSubmitted(true);
-    toast.success("Quote request sent successfully!");
+      if (!res.ok) throw new Error("Failed to send quote request");
 
-    // RESET the stored form, not e.currentTarget
-    form.reset();
-    setFileName("");
-  } catch (err) {
-    console.error("Submit error:", err);
-    toast.error("Something went wrong. Please try again.");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      setSubmitted(true);
+      toast.success("Quote request sent successfully!");
+
+      form.reset();
+      setUploadedFiles([]);
+    } catch (err) {
+      console.error("Submit error:", err);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (submitted) {
     return (
@@ -132,22 +168,57 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
               />
             </div>
 
-            <div
-              onClick={() => fileRef.current?.click()}
-              className="border-2 border-dashed border-foreground/10 rounded-xl p-8 text-center hover:bg-foreground/[0.02] transition-colors cursor-pointer"
-            >
-              <input
-                ref={fileRef}
-                type="file"
-                className="hidden"
-                accept="image/*,.pdf,.ai,.psd"
-                name="file"
-                onChange={(e) => setFileName(e.target.files?.[0]?.name || "")}
-              />
+            <div className="space-y-3">
+              <div
+                onClick={() => fileRef.current?.click()}
+                className="border-2 border-dashed border-foreground/10 rounded-xl p-8 text-center hover:bg-foreground/[0.02] transition-colors cursor-pointer"
+              >
+                <input
+                  ref={fileRef}
+                  type="file"
+                  className="hidden"
+                  accept="image/*,.pdf,.ai,.psd,.doc,.docx,.txt"
+                  multiple
+                  onChange={handleFileChange}
+                />
 
-              <p className="text-muted-foreground text-sm">
-                {fileName || "Click to upload your design file (optional)"}
-              </p>
+                <p className="text-muted-foreground text-sm font-medium">
+                  Click to upload your design files (optional)
+                </p>
+                <p className="text-muted-foreground text-xs mt-2">
+                  Max 25MB per file. Support: Images, PDF, AI, PSD, DOC, TXT
+                </p>
+              </div>
+
+              {/* Display uploaded files */}
+              {uploadedFiles.length > 0 && (
+                <div className="space-y-2 bg-foreground/[0.02] rounded-xl p-4">
+                  <p className="text-sm font-medium text-foreground">
+                    Uploaded files ({uploadedFiles.length}):
+                  </p>
+                  {uploadedFiles.map((file, index) => (
+                    <div
+                      key={`${file.name}-${index}`}
+                      className="flex items-center justify-between bg-card rounded-lg p-3 text-sm"
+                    >
+                      <div className="flex-1">
+                        <p className="text-foreground font-medium truncate">{file.name}</p>
+                        <p className="text-muted-foreground text-xs">
+                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeFile(index)}
+                        className="ml-3 p-1 hover:bg-foreground/10 rounded transition-colors text-muted-foreground hover:text-foreground"
+                        aria-label="Remove file"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <textarea
@@ -166,7 +237,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
               className="w-full bg-foreground text-background rounded-xl py-4 font-bold text-lg relative overflow-hidden group disabled:opacity-50"
             >
               <span className="relative z-10 group-hover:text-foreground transition-colors">
-                {isSubmitting ? "Sending..." : "Get My Quote"}
+                {isSubmitting ? "Sending..." : "Request a Print Quote"}
               </span>
 
               <div className="absolute inset-0 bg-gradient-to-r from-cyan via-magenta to-yellow opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
