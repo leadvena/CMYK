@@ -35,10 +35,9 @@ export default async function handler(req: Request) {
       
       if (file && file.size > 0) {
         const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
         attachments.push({
           filename: file.name,
-          content: buffer,
+          content: new Uint8Array(arrayBuffer),
         });
       }
     }
@@ -47,10 +46,9 @@ export default async function handler(req: Request) {
     const legacyFile = formData.get("file") as File | null;
     if (legacyFile && legacyFile.size > 0) {
       const arrayBuffer = await legacyFile.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
       attachments.push({
         filename: legacyFile.name,
-        content: buffer,
+        content: new Uint8Array(arrayBuffer),
       });
     }
 
