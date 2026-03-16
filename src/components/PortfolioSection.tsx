@@ -24,7 +24,7 @@ const items = [
   { image: p8, label: "Custom Bottles" },
   { image: p9, label: "Event Backdrop" },
   { image: p10, label: "Packaging Design" },
-  { image: p11, label: "Stationery Set" },
+  { image: p11, label: "Business Cards" },
   { image: p12, label: "Sublimated Shirts" },
 ];
 
