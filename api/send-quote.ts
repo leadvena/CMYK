@@ -24,7 +24,7 @@ export default async function handler(req: Request) {
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
-    let attachments = [];
+    let attachments: any[] = [];
 
     // Handle multiple files
     const fileCount = formData.get("fileCount");
@@ -34,7 +34,8 @@ export default async function handler(req: Request) {
       const file = formData.get(`file_${i}`) as File | null;
       
       if (file && file.size > 0) {
-        const buffer = Buffer.from(await file.arrayBuffer());
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
         attachments.push({
           filename: file.name,
           content: buffer,
@@ -45,7 +46,8 @@ export default async function handler(req: Request) {
     // Also check for legacy single file field for backwards compatibility
     const legacyFile = formData.get("file") as File | null;
     if (legacyFile && legacyFile.size > 0) {
-      const buffer = Buffer.from(await legacyFile.arrayBuffer());
+      const arrayBuffer = await legacyFile.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
       attachments.push({
         filename: legacyFile.name,
         content: buffer,
