@@ -15,67 +15,67 @@ const QuoteForm = () => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
-const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const files = Array.from(e.target.files || []);
-  
-  // Validate each file
-  const validFiles: File[] = [];
-  for (const file of files) {
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error(`File "${file.name}" is too large. Max size is 25MB.`);
-      continue;
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    
+    // Validate each file
+    const validFiles: File[] = [];
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(`File "${file.name}" is too large. Max size is 25MB.`);
+        continue;
+      }
+      validFiles.push(file);
     }
-    validFiles.push(file);
-  }
 
-  if (validFiles.length > 0) {
-    setUploadedFiles((prev) => [...prev, ...validFiles]);
-    toast.success(`${validFiles.length} file(s) added successfully!`);
-  }
+    if (validFiles.length > 0) {
+      setUploadedFiles((prev) => [...prev, ...validFiles]);
+      toast.success(`${validFiles.length} file(s) added successfully!`);
+    }
 
-  // Reset input so same file can be selected again
-  if (fileRef.current) {
-    fileRef.current.value = "";
-  }
-};
+    // Reset input so same file can be selected again
+    if (fileRef.current) {
+      fileRef.current.value = "";
+    }
+  };
 
-const removeFile = (index: number) => {
-  setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
-};
+  const removeFile = (index: number) => {
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  setIsSubmitting(true);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
 
-  const form = e.currentTarget;
-  const formData = new FormData(form);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
 
-  // Append uploaded files to FormData
-  uploadedFiles.forEach((file, index) => {
-    formData.append(`file_${index}`, file);
-  });
-  formData.append("fileCount", uploadedFiles.length.toString());
-
-  try {
-    const res = await fetch("/api/send-quote", {
-      method: "POST",
-      body: formData,
+    // Append uploaded files to FormData
+    uploadedFiles.forEach((file, index) => {
+      formData.append(`file_${index}`, file);
     });
+    formData.append("fileCount", uploadedFiles.length.toString());
 
-    if (!res.ok) throw new Error("Failed to send quote request");
+    try {
+      const res = await fetch("/api/send-quote", {
+        method: "POST",
+        body: formData,
+      });
 
-    setSubmitted(true);
-    toast.success("Quote request sent successfully!");
+      if (!res.ok) throw new Error("Failed to send quote request");
 
-    form.reset();
-    setUploadedFiles([]);
-  } catch (err) {
-    console.error("Submit error:", err);
-    toast.error("Something went wrong. Please try again.");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      setSubmitted(true);
+      toast.success("Quote request sent successfully!");
+
+      form.reset();
+      setUploadedFiles([]);
+    } catch (err) {
+      console.error("Submit error:", err);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (submitted) {
     return (
