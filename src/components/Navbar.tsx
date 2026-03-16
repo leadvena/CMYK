@@ -46,7 +46,7 @@ const Navbar = () => {
             className="px-5 py-2.5 rounded-full text-sm font-bold bg-cyan"
             style={{ color: "white" }}
           >
-            Get a Quote
+            Request a Print Quote
           </motion.button>
         </div>
       </div>
