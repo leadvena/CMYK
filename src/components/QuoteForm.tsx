@@ -1,41 +1,85 @@
-"use client";
-
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { spring } from "@/lib/motion";
-import { X } from "lucide-react";
+import { X, Upload, Loader } from "lucide-react";
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB like Gmail
-const ALLOWED_FILE_TYPES = ["image/*", ".pdf", ".ai", ".psd", ".doc", ".docx", ".txt"];
+
+interface UploadedFile {
+  name: string;
+  url: string;
+  size: number;
+}
 
 const QuoteForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const uploadToCloudinary = async (file: File): Promise<UploadedFile | null> => {
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+    if (!cloudName || !uploadPreset) {
+      toast.error("Cloudinary configuration missing. Please check environment variables.");
+      return null;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", uploadPreset);
+
+    try {
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const data = await response.json();
+      return {
+        name: file.name,
+        url: data.secure_url,
+        size: file.size,
+      };
+    } catch (error) {
+      console.error("Cloudinary upload error:", error);
+      toast.error(`Failed to upload ${file.name}`);
+      return null;
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    
-    // Validate each file
-    const validFiles: File[] = [];
+
+    if (files.length === 0) return;
+
+    setIsUploading(true);
+
     for (const file of files) {
       if (file.size > MAX_FILE_SIZE) {
         toast.error(`File "${file.name}" is too large. Max size is 25MB.`);
         continue;
       }
-      validFiles.push(file);
+
+      const uploadedFile = await uploadToCloudinary(file);
+      if (uploadedFile) {
+        setUploadedFiles((prev) => [...prev, uploadedFile]);
+        toast.success(`File "${file.name}" uploaded successfully!`);
+      }
     }
 
-    if (validFiles.length > 0) {
-      setUploadedFiles((prev) => [...prev, ...validFiles]);
-      toast.success(`${validFiles.length} file(s) added successfully!`);
-    }
+    setIsUploading(false);
 
     // Reset input so same file can be selected again
-    if (fileRef.current) {
-      fileRef.current.value = "";
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -50,9 +94,10 @@ const QuoteForm = () => {
     const form = e.currentTarget;
     const formData = new FormData(form);
 
-    // Append uploaded files to FormData
+    // Append uploaded file URLs to FormData
     uploadedFiles.forEach((file, index) => {
-      formData.append(`file_${index}`, file);
+      formData.append(`fileUrl_${index}`, file.url);
+      formData.append(`fileName_${index}`, file.name);
     });
     formData.append("fileCount", uploadedFiles.length.toString());
 
@@ -170,24 +215,28 @@ const QuoteForm = () => {
 
             <div className="space-y-3">
               <div
-                onClick={() => fileRef.current?.click()}
+                onClick={() => fileInputRef.current?.click()}
                 className="border-2 border-dashed border-foreground/10 rounded-xl p-8 text-center hover:bg-foreground/[0.02] transition-colors cursor-pointer"
               >
                 <input
-                  ref={fileRef}
+                  ref={fileInputRef}
                   type="file"
                   className="hidden"
-                  accept="image/*,.pdf,.ai,.psd,.doc,.docx,.txt"
+                  accept="image/*,.pdf,.doc,.docx,.txt"
                   multiple
                   onChange={handleFileChange}
+                  disabled={isUploading}
                 />
 
-                <p className="text-muted-foreground text-sm font-medium">
-                  Click to upload your design files (optional)
-                </p>
-                <p className="text-muted-foreground text-xs mt-2">
-                  Max 25MB per file. Support: Images, PDF, AI, PSD, DOC, TXT
-                </p>
+                <div className="flex flex-col items-center justify-center">
+                  <Upload className={`w-6 h-6 text-muted-foreground mb-3 ${isUploading ? 'animate-pulse' : ''}`} />
+                  <p className="text-muted-foreground text-sm font-medium">
+                    {isUploading ? "Uploading..." : "Click to upload your design files (optional)"}
+                  </p>
+                  <p className="text-muted-foreground text-xs mt-2">
+                    Max 25MB per file. Support: Images, PDF, DOC, TXT
+                  </p>
+                </div>
               </div>
 
               {/* Display uploaded files */}
