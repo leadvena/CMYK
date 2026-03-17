@@ -1,19 +1,26 @@
+"use client";
+
 import { motion } from "framer-motion";
 import { spring } from "@/lib/motion";
 
+// 1. Update your brand data with image paths. 
+// Make sure these images are located in your /public/brands/ folder.
 const brands = [
-  { name: "Local News Agency", logo: "📰" },
-  { name: "Event Management Co.", logo: "🎯" },
-  { name: "Corporate Design Firm", logo: "🎨" },
-  { name: "Fashion Boutique", logo: "👗" },
-  { name: "Restaurant & Cafe", logo: "☕" },
-  { name: "Tourism Board", logo: "🌍" },
+  { name: "Local News Agency", logo: "/brands/1.png" },
+  { name: "Event Management Co.", logo: "/brands/2.png" },
+  { name: "Corporate Design Firm", logo: "/brands/3.png" },
+  { name: "Fashion Boutique", logo: "/brands/4.png" },
+  { name: "Restaurant & Cafe", logo: "/brands/5.png" },
+  { name: "Tourism Board", logo: "/brands/6.png" },
 ];
 
 const TrustedBySection = () => {
+  // We double the array to ensure there's always content visible during the loop
+  const duplicatedBrands = [...brands, ...brands];
+
   return (
-    <section className="py-20 px-6 bg-background border-t border-border">
-      <div className="max-w-7xl mx-auto">
+    <section className="py-20 bg-background border-t border-border overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -24,42 +31,64 @@ const TrustedBySection = () => {
           <p className="text-sm md:text-base font-semibold tracking-widest uppercase text-muted-foreground mb-2">
             Trusted By
           </p>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-[-0.02em] text-foreground">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
             Trusted by Leading Brands in Bogo City
           </h2>
         </motion.div>
+      </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          {brands.map((brand, i) => (
-            <motion.div
-              key={brand.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ ...spring, delay: i * 0.08 }}
-              className="flex flex-col items-center justify-center p-6 rounded-2xl bg-card hover:shadow-base transition-shadow group cursor-pointer"
-            >
-              <div className="text-5xl mb-3 group-hover:scale-110 transition-transform duration-300">
-                {brand.logo}
-              </div>
-              <p className="text-sm font-medium text-foreground text-center text-pretty">
-                {brand.name}
-              </p>
-            </motion.div>
-          ))}
-        </div>
+      {/* Outer Container with Masking Gradient */}
+      <div className="relative flex overflow-hidden py-8">
+        {/* Gradient masks on the sides for a smooth "fade-in/out" effect */}
+        <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background to-transparent z-10" />
+        <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background to-transparent z-10" />
 
         <motion.div
+          className="flex whitespace-nowrap"
+          animate={{
+            x: ["0%", "-50%"], 
+          }}
+          transition={{
+            duration: 35, // Slower duration (35s) feels more premium for images
+            ease: "linear",
+            repeat: Infinity,
+          }}
+          // This allows users to stop the scroll to see a specific brand
+          whileHover={{ animationPlayState: "paused" }}
+        >
+          {duplicatedBrands.map((brand, i) => (
+            <div
+              key={`${brand.name}-${i}`}
+              className="flex items-center gap-6 mx-12 group cursor-pointer"
+            >
+              {/* Image Container */}
+              <div className="relative w-32 h-16 md:w-44 md:h-20 flex items-center justify-center">
+                <img
+                  src={brand.logo}
+                  alt={`${brand.name} logo`}
+                  className="max-w-full max-h-full object-contain grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500"
+                />
+              </div>
+              
+              {/* Brand Name */}
+              <span className="text-lg font-bold text-muted-foreground group-hover:text-foreground transition-colors whitespace-nowrap">
+                {brand.name}
+              </span>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 mt-12 text-center">
+        <motion.p
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ ...spring, delay: 0.5 }}
-          className="mt-12 text-center"
+          className="text-muted-foreground text-lg max-w-2xl mx-auto"
         >
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto text-pretty">
-            Join hundreds of satisfied clients who trust us with their printing and design needs.
-          </p>
-        </motion.div>
+          Join hundreds of satisfied clients who trust us with their printing and design needs.
+        </motion.p>
       </div>
     </section>
   );
