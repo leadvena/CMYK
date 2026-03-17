@@ -46,10 +46,11 @@ export default async function handler(req: Request) {
         }
 
         const arrayBuffer = await file.arrayBuffer();
+        const base64Content = Buffer.from(arrayBuffer).toString("base64");
 
         attachments.push({
           filename: file.name,
-          content: Buffer.from(arrayBuffer), // ✅ FIXED
+          content: base64Content,
         });
       }
     }
@@ -59,10 +60,11 @@ export default async function handler(req: Request) {
 
     if (legacyFile && legacyFile.size > 0 && attachments.length === 0) {
       const arrayBuffer = await legacyFile.arrayBuffer();
+      const base64Content = Buffer.from(arrayBuffer).toString("base64");
 
       attachments.push({
         filename: legacyFile.name,
-        content: Buffer.from(arrayBuffer),
+        content: base64Content,
       });
     }
 
