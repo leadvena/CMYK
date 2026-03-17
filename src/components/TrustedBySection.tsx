@@ -6,12 +6,12 @@ import { spring } from "@/lib/motion";
 // 1. Update your brand data with image paths. 
 // Make sure these images are located in your /public/brands/ folder.
 const brands = [
-  { name: "Local News Agency", logo: "/brands/1.png" },
-  { name: "Event Management Co.", logo: "/brands/2.png" },
-  { name: "Corporate Design Firm", logo: "/brands/3.png" },
-  { name: "Fashion Boutique", logo: "/brands/4.png" },
-  { name: "Restaurant & Cafe", logo: "/brands/5.png" },
-  { name: "Tourism Board", logo: "/brands/6.png" },
+  { name: "Local News Agency", logo: "@/brands/1.png" },
+  { name: "Event Management Co.", logo: "@/brands/2.png" },
+  { name: "Corporate Design Firm", logo: "@/brands/3.png" },
+  { name: "Fashion Boutique", logo: "@/brands/4.png" },
+  { name: "Restaurant & Cafe", logo: "@/brands/5.png" },
+  { name: "Tourism Board", logo: "@/brands/6.png" },
 ];
 
 const TrustedBySection = () => {
