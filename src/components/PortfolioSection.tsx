@@ -21,7 +21,7 @@ const items = [
   { image: p5, label: "Graphic Design" },
   { image: p6, label: "Birthday Banner" },
   { image: p7, label: "Logo Design" },
-  { image: p8, label: "Custom Bottles" },
+  { image: p8, label: "Menu" },
   { image: p9, label: "Event Backdrop" },
   { image: p10, label: "Packaging Design" },
   { image: p11, label: "Business Cards" },
