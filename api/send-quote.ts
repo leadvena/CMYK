@@ -1,58 +1,73 @@
 import { Resend } from "resend";
 
-export const config = {
-  runtime: "edge",
-};
-
 export default async function handler(req: Request) {
-
   if (req.method !== "POST") {
     return new Response("Method Not Allowed", { status: 405 });
   }
 
   try {
-
     const formData = await req.formData();
 
-    const name = formData.get("name");
-    const phone = formData.get("phone");
-    const email = formData.get("email");
-    const service = formData.get("service");
-    const size = formData.get("size");
-    const quantity = formData.get("quantity");
-    const message = formData.get("message");
+    // ✅ Extract & sanitize inputs
+    const name = (formData.get("name") || "").toString();
+    const phone = (formData.get("phone") || "").toString();
+    const email = (formData.get("email") || "").toString();
+    const service = (formData.get("service") || "").toString();
+    const size = (formData.get("size") || "").toString();
+    const quantity = (formData.get("quantity") || "").toString();
+    const message = (formData.get("message") || "").toString();
+
+    // ✅ Basic validation
+    if (!name || !email) {
+      return new Response("Missing required fields", { status: 400 });
+    }
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     let attachments: any[] = [];
+    let totalSize = 0;
 
-    // Handle multiple files
-    const fileCount = formData.get("fileCount");
-    const count = fileCount ? parseInt(fileCount as string) : 0;
+    const MAX_TOTAL_SIZE = 20 * 1024 * 1024; // 20MB limit
 
-    for (let i = 0; i < count; i++) {
+    // ✅ Handle multiple files
+    const fileCount = parseInt((formData.get("fileCount") || "0") as string);
+
+    for (let i = 0; i < fileCount; i++) {
       const file = formData.get(`file_${i}`) as File | null;
-      
+
       if (file && file.size > 0) {
+        totalSize += file.size;
+
+        // ❌ Prevent oversized payloads
+        if (totalSize > MAX_TOTAL_SIZE) {
+          return new Response("Total file size exceeds 20MB limit", {
+            status: 400,
+          });
+        }
+
         const arrayBuffer = await file.arrayBuffer();
+
         attachments.push({
           filename: file.name,
-          content: new Uint8Array(arrayBuffer),
+          content: Buffer.from(arrayBuffer), // ✅ FIXED
         });
       }
     }
 
-    // Also check for legacy single file field for backwards compatibility
+    // ⚠️ Optional: handle legacy single file (only if needed)
     const legacyFile = formData.get("file") as File | null;
-    if (legacyFile && legacyFile.size > 0) {
+
+    if (legacyFile && legacyFile.size > 0 && attachments.length === 0) {
       const arrayBuffer = await legacyFile.arrayBuffer();
+
       attachments.push({
         filename: legacyFile.name,
-        content: new Uint8Array(arrayBuffer),
+        content: Buffer.from(arrayBuffer),
       });
     }
 
-    await resend.emails.send({
+    // ✅ Send email
+    const { data, error } = await resend.emails.send({
       from: "CMYK Quotes <onboarding@resend.dev>",
       to: "kristaezekiel28@gmail.com",
       subject: "New Quote Request",
@@ -67,19 +82,23 @@ export default async function handler(req: Request) {
         <p><b>Quantity:</b> ${quantity}</p>
         <p><b>Message:</b> ${message}</p>
       `,
-      attachments
+      attachments,
     });
 
-    return Response.json({ success: true });
+    // ❌ Handle email failure properly
+    if (error) {
+      console.error("Resend error:", error);
+      return new Response("Failed to send email", { status: 500 });
+    }
+
+    return Response.json({ success: true, data });
 
   } catch (error) {
+    console.error("Server error:", error);
 
-    console.error(error);
-
-    return Response.json(
-      { error: "Failed to send email" },
+    return new Response(
+      JSON.stringify({ error: "Internal server error" }),
       { status: 500 }
     );
-
   }
 }
