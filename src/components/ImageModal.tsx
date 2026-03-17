@@ -30,14 +30,6 @@ const ImageModal = ({ children, image, alt, title }: ImageModalProps) => {
           transition={{ duration: 0.2 }}
           className="relative"
         >
-          {/* Close Button */}
-          <button
-            onClick={() => setOpen(false)}
-            className="absolute -top-10 right-0 z-50 p-2 text-white hover:bg-white/10 rounded-full transition-colors"
-            aria-label="Close modal"
-          >
-            <X className="w-6 h-6" />
-          </button>
 
           {/* Image Container */}
           <div className="relative rounded-lg overflow-hidden bg-black">
