@@ -6,8 +6,17 @@ import { toast } from "sonner";
 import { spring } from "@/lib/motion";
 import { X } from "lucide-react";
 
-const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB like Gmail
-const ALLOWED_FILE_TYPES = ["image/*", ".pdf", ".ai", ".psd", ".doc", ".docx", ".txt"];
+const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB per file
+const MAX_TOTAL_SIZE = 12 * 1024 * 1024; // 12MB total
+const ALLOWED_FILE_TYPES = [
+  "image/",
+  ".pdf",
+  ".ai",
+  ".psd",
+  ".doc",
+  ".docx",
+  ".txt",
+];
 
 const QuoteForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -17,15 +26,37 @@ const QuoteForm = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    
-    // Validate each file
+    let totalSize = uploadedFiles.reduce((sum, f) => sum + f.size, 0);
     const validFiles: File[] = [];
+
     for (const file of files) {
-      if (file.size > MAX_FILE_SIZE) {
-        toast.error(`File "${file.name}" is too large. Max size is 25MB.`);
+      // File type validation
+      const isValidType = ALLOWED_FILE_TYPES.some((type) =>
+        type.endsWith("/") ? file.type.startsWith(type) : file.name.endsWith(type)
+      );
+      if (!isValidType) {
+        toast.error(`File "${file.name}" type is not allowed.`);
         continue;
       }
+
+      // Individual size validation
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(
+          `File "${file.name}" is too large. Max per file is ${MAX_FILE_SIZE / 1024 / 1024}MB.`
+        );
+        continue;
+      }
+
+      // Total size validation
+      if (totalSize + file.size > MAX_TOTAL_SIZE) {
+        toast.error(
+          `Cannot add "${file.name}". Total upload limit is ${MAX_TOTAL_SIZE / 1024 / 1024}MB.`
+        );
+        continue;
+      }
+
       validFiles.push(file);
+      totalSize += file.size;
     }
 
     if (validFiles.length > 0) {
@@ -34,9 +65,7 @@ const QuoteForm = () => {
     }
 
     // Reset input so same file can be selected again
-    if (fileRef.current) {
-      fileRef.current.value = "";
-    }
+    if (fileRef.current) fileRef.current.value = "";
   };
 
   const removeFile = (index: number) => {
@@ -50,7 +79,6 @@ const QuoteForm = () => {
     const form = e.currentTarget;
     const formData = new FormData(form);
 
-    // Append uploaded files to FormData
     uploadedFiles.forEach((file, index) => {
       formData.append(`file_${index}`, file);
     });
@@ -66,7 +94,6 @@ const QuoteForm = () => {
 
       setSubmitted(true);
       toast.success("Quote request sent successfully!");
-
       form.reset();
       setUploadedFiles([]);
     } catch (err) {
@@ -186,11 +213,10 @@ const QuoteForm = () => {
                   Click to upload your design files (optional)
                 </p>
                 <p className="text-muted-foreground text-xs mt-2">
-                  Max 25MB per file. Support: Images, PDF, AI, PSD, DOC, TXT
+                  Max 8MB per file, 12MB total. Support: Images, PDF, AI, PSD, DOC, TXT
                 </p>
               </div>
 
-              {/* Display uploaded files */}
               {uploadedFiles.length > 0 && (
                 <div className="space-y-2 bg-foreground/[0.02] rounded-xl p-4">
                   <p className="text-sm font-medium text-foreground">
