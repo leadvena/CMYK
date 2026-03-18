@@ -6,12 +6,13 @@ import { spring } from "@/lib/motion";
 // 1. Update your brand data with image paths. 
 // Make sure these images are located in your /public/brands/ folder.
 const brands = [
-  { name: "Local News Agency", logo: "@/brands/1.png" },
-  { name: "Event Management Co.", logo: "@/brands/2.png" },
-  { name: "Corporate Design Firm", logo: "@/brands/3.png" },
-  { name: "Fashion Boutique", logo: "@/brands/4.png" },
-  { name: "Restaurant & Cafe", logo: "@/brands/5.png" },
-  { name: "Tourism Board", logo: "@/brands/6.png" },
+  { name: "GWADDY'S UNLIMITED TUSLO BUWA + PUNGKO PUNGKO", logo: "/brands/1.png" },
+  { name: "FAITH CAR RENTAL", logo: "/brands/2.png" },
+  { name: "BAKHAW RESTAURANT", logo: "/brands/3.png" },
+  { name: "JACKIE'S FOOTWEAR SHOP", logo: "/brands/4.png" },
+  { name: "CHERYLL SWEET TREATS ", logo: "/brands/5.png" },
+  { name: "KNOAH MARI", logo: "/brands/6.jpg" },
+  { name: "KOBE MOTORPARTS & ACCESSORIES", logo: "/brands/7.jpg" },
 ];
 
 const TrustedBySection = () => {
@@ -29,11 +30,11 @@ const TrustedBySection = () => {
           className="text-center mb-12"
         >
           <p className="text-sm md:text-base font-semibold tracking-widest uppercase text-muted-foreground mb-2">
-            Trusted By
-          </p>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-            Trusted by Leading Brands in Bogo City
-          </h2>
+  Our Growing Community
+</p>
+<h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+  Trusted by Businesses Across <span className="text-cyan">Northern Cebu</span> and Beyond
+</h2>
         </motion.div>
       </div>
 

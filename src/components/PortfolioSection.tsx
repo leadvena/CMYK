@@ -19,11 +19,11 @@ const items = [
   { image: p3, label: "Promotional Mugs" },
   { image: p4, label: "Business Signage" },
   { image: p5, label: "Graphic Design" },
-  { image: p6, label: "Birthday Banner" },
+  { image: p6, label: "Commemorative Graduation Banner" },
   { image: p7, label: "Logo Design" },
   { image: p8, label: "Menu" },
   { image: p9, label: "Event Backdrop" },
-  { image: p10, label: "Packaging Design" },
+  { image: p10, label: "Refrigerator Magnets" },
   { image: p11, label: "Business Cards" },
   { image: p12, label: "Sublimated Shirts" },
 ];
