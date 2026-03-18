@@ -20,7 +20,8 @@ const TrustedBySection = () => {
   const duplicatedBrands = [...brands, ...brands];
 
   return (
-    <section className="py-20 bg-background border-t border-border overflow-hidden">
+    
+    <section id="partners" className="py-20 bg-background border-t border-border overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
